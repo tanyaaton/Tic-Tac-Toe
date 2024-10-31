@@ -103,14 +103,25 @@ def robot_turn(input_int):
                 time.sleep(0.5)
 def home():
         count = 0
-        while count < 5000:
+        while count < 7000:
                 print("First command")
-                radians_list = [round(math.radians(degree), 3) for degree in [90, -90, -90, -90, 90, 0]]
-                cmd_move = str.encode(f'servoj({radians_list}, 0, 0,0.01, 0.1, 200)\n')
+                # radians_list = [round(math.radians(degree), 3) for degree in [-90, -90, -90, -90, 90, 0]]
+                radians_list = [round(math.radians(degree), 3) for degree in [90, -90, -90, 0, 90, 360]]
+                cmd_move = str.encode(f'servoj({radians_list}, 0, 0,0.01, 0.1, 100)\n')
                 s.send(cmd_move)
                 print("Done send command")
                 count += 1
         print("Home command")
+
+def test():
+        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0.05,0,0,0,0,0]),1,0.25,0,0)\n')
+        time.sleep(1)
+        # s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0,0.05,0,0,0]),1,0.25,0,0)\n')
+        # time.sleep(1)
+        # s.send(b'movel(pose_add(get_actual_tcp_pose(),p[-0.05,0,0,0,0,0]),1,0.25,0,0)\n')
+        # time.sleep(1)
+        # s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0,-0.05,0,0,0]),1,0.25,0,0)\n')
+        # time.sleep(1)
 
 #####################################################################################################################
 
@@ -118,5 +129,7 @@ if __name__ == '__main__':
         UR_set_up()
         # robot_turn()
         # robot_turn(0)
-        home()
+        # home()
+        # test()
+        # read_pos()
 
