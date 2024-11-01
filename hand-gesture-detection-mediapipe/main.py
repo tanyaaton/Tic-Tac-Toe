@@ -1,7 +1,7 @@
 # Main game loop
 board = [" " for _ in range(9)]
 from minimax_tictactoe import display_board, check_winner, is_board_full, computer_move
-from UR3e_control import robot_move, human_move, play_position, home, UR_set_up, test
+from UR3e_control import robot_move, human_move, play_position, home, UR_set_up, test, grid
 
 import socket, struct, time
 from pymodbus.client import ModbusTcpClient
@@ -49,7 +49,7 @@ def play_game():
         
         # Computer's turn
         computer_pos = computer_move()
-        robot_move(computer_pos, 'X')
+        robot_move(computer_pos, 'O')
         display_board()
         
         # Check if computer wins
@@ -66,7 +66,9 @@ def play_game():
 if __name__ == '__main__':
         UR_set_up()
         home()
+        time.sleep(3)
+        grid()
         # test()
-        # play_position()
+        play_position()
         play_game()
         # robot_move(1, 'X')
