@@ -70,10 +70,6 @@ def computer_move():
     board[move] = "O"
     print("Computer chooses position:", move + 1)
 
-
-# def loop():
-
-
 # Main game loop
 def play_game():
     print("Welcome to Tic-Tac-Toe!")
@@ -118,5 +114,5 @@ def play_game():
             print("It's a tie!")
             break
 
-if __name__ == '__main__':
-        play_game()
+# Start the game
+play_game()
