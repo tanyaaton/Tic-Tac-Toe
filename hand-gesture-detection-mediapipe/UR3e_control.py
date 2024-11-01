@@ -5,6 +5,7 @@ from pymodbus.client import ModbusTcpClient
 import numpy,time
 import math
 
+from minimax_tictactoe import display_board, check_winner, is_board_full, board, computer_move
 
 def UR_set_up():
         global tcp, joint_rad, joint_deg, joint_rev
@@ -113,23 +114,148 @@ def home():
                 count += 1
         print("Home command")
 
-def test():
-        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0.05,0,0,0,0,0]),1,0.25,0,0)\n')
+def play_position():
+        # s.send(b'movel(p[0.0818,0.4126,0.4305, -1.572, 0, 0],1,0.2,0,0)\n')
+        # y -5
+        cmb_move = str.encode('movel(p[0.0818,0.4126,0.4305, -1.572, 0, 0],1,0.2,0,0)\n')
+        s.send(cmb_move)
+        time.sleep(4) 
+
+
+
+def grid():
+        # First Hori. line
         time.sleep(1)
+        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0.1,0,0,0,0,0]),1,0.2,0,0)\n')
+        time.sleep(2)   
+        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[-0.1,0,0,0,0,0]),1,0.2,0,0)\n')     
+        time.sleep(2)  
+        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[-0.2,0,0,0,0,0]),1,0.2,0,0)\n')
+        time.sleep(3) 
+        s.send(b'movel(p[0.1318,0.4625, 0.4805, -1.572, 0, 0],1,0.2,0,0)\n')
+        time.sleep(3)  
+        # Second Hori. line  
+        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0,-0.1,0,0,0]),1,0.25,0,0)\n')
+        time.sleep(1)
+        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0.1,0,0,0,0,0]),1,0.2,0,0)\n')
+        time.sleep(2)   
+        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[-0.1,0,0,0,0,0]),1,0.2,0,0)\n')     
+        time.sleep(2)  
+        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[-0.2,0,0,0,0,0]),1,0.2,0,0)\n')
+        time.sleep(2)
+        s.send(b'movel(p[0.1318,0.4625, 0.3805, -1.572, 0, 0],1,0.2,0,0)\n')
+        time.sleep(3)  
+        #First vertical line
+        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0,-0.1,0,0,0]),1,0.2,0,0)\n')
+        time.sleep(2)   
+        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0,0.3,0,0,0]),1,0.2,0,0)\n')     
+        time.sleep(3)  
+        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0,-0.1,0,0,0]),1,0.2,0,0)\n')
+        time.sleep(3) 
+        #Second vertical line
+        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[-0.1,0,0,0,0,0]),1,0.2,0,0)\n')
+        time.sleep(2)   
+        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0,0.1,0,0,0]),1,0.2,0,0)\n')
+        time.sleep(2)   
+        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0,-0.3,0,0,0]),1,0.2,0,0)\n')     
+        time.sleep(3)  
+        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0.05,0.1,0,0,0]),1,0.2,0,0)\n')
+        time.sleep(3) 
+        play_position()
+#####################################################################################################################
+
+position = {
+    "p0": "p[0.0818, 0.4126, 0.4305, -1.572, 0, 0]",
+    "p1": "p[-0.1, 0.0, 0.1,  0.0, 0.0, 0.0]",
+    "p2": "p[0.0,  0.0, 0.1,  0,   0.0, 0.0]",
+    "p3": "p[0.1,  0.0, 0.1,  0.0, 0.0, 0.0]",
+    "p4": "p[-0.1, 0.0, 0.0,  0.0, 0.0, 0.0]",
+    "p5": "p[0.0,  0.0, 0.0,  0.0, 0.0, 0.0]",
+    "p6": "p[0.1,  0.0, 0.0,  0.0, 0.0, 0.0]",
+    "p7": "p[-0.1, 0.0, -0.1,  0.0, 0.0, 0.0]",
+    "p8": "p[0.0,  0.0, -0.1,  0.0, 0.0, 0.0]",
+    "p9": "p[0.1,  0.0, -0.1,  0.0, 0.0, 0.0]",
+}
+
+position_X = {
+    "q1": "p[0.02, 0.0, 0.02,  0.0, 0.0, 0.0]",
+    "q2": "p[-0.02,  0.0, -0.02,  0.0, 0.0, 0.0]",
+    "q3": "p[0.0, 0.0, 0.02828,  0.0, 0.0, 0.0]",
+    "q4": "p[0.02, 0.0, -0.02,  0.0, 0.0, 0.0]"
+
+}
+
+def relative_command(p):
+    return str.encode(f'movel(pose_add(get_actual_tcp_pose(),{p}),1,0.2,0,0)\n')
+
+def move_to_position(p):
+    cmd_move = relative_command(p)
+    s.send(cmd_move)
+    time.sleep(1)
+
+def move_in():
+        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0.05,0,0,0,0]),1,0.25,0,0)\n')
+        time.sleep(1)
+
+
+
+def draw_X():
+        move_to_position(position_X["q1"])
+        move_to_position(position_X["q2"])
+        move_to_position(position_X["q3"])
+        move_to_position(position_X["q4"])
+        return None
+
+def draw_O():
+        return None
+
+def player_turn(position, symbol):
+        move_to_position(position)
+        if symbol == "X":
+                draw_X()
+        elif symbol == "O":
+                draw_O()
+        return None
+
+def robot_turn(position, symbol):
+        #xo algorithm
+        move_to_position(position)
+        if symbol == "X":
+                draw_X()
+        elif symbol == "O":
+                draw_O()
+        return None
+
+
+
+def test():
+        # s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0.05,0,0,0,0,0]),1,0.25,0,0)\n')
+        # time.sleep(1)
         # s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0,0.05,0,0,0]),1,0.25,0,0)\n')
         # time.sleep(1)
         # s.send(b'movel(pose_add(get_actual_tcp_pose(),p[-0.05,0,0,0,0,0]),1,0.25,0,0)\n')
         # time.sleep(1)
         # s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0,-0.05,0,0,0]),1,0.25,0,0)\n')
         # time.sleep(1)
+        # s.send(b'movel(pose_add(get_actual_tcp_pose(),p[-0.05,-0.05,-0.05,0,0,0]),1,0.25,0,0)\n')     
+        # time.sleep(1) 
+        play_position()
+        i=1
+        print(f"p{i}")
+        print(position[f"p{i}"])
+        move_to_position(position[f"p{i}"])
+        move_in()
+        draw_X()
+        print("Done")
+        play_position()
 
-#####################################################################################################################
+
 
 if __name__ == '__main__':
         UR_set_up()
         # robot_turn()
         # robot_turn(0)
-        # home()
-        # test()
+        home()
+        test()
+        # grid()
         # read_pos()
-
