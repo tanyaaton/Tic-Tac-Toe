@@ -4,8 +4,9 @@ import socket, struct, time
 from pymodbus.client import ModbusTcpClient
 import numpy,time
 import math
+from gripper import Gripper
 
-from minimax_tictactoe import display_board, check_winner, is_board_full, board, computer_move
+# from minimax_tictactoe import display_board, check_winner, is_board_full, board, computer_move
 
 def UR_set_up():
         global tcp, joint_rad, joint_deg, joint_rev
@@ -249,13 +250,32 @@ def test():
         print("Done")
         play_position()
 
+def gripper_connection():
+        global gripper
+        gripper = Gripper('10.10.0.61', 63352)
+        gripper.connection()
 
+def gripper_test():
+        gripper.control(255)
+        time.sleep(3)
+        gripper.control(0)
+
+def gripper_close():
+        gripper.control(255)
+
+def gripper_open():
+        gripper.control(0)
 
 if __name__ == '__main__':
-        UR_set_up()
+        # gripper_connection()
+        # gripper_test()
+        # gripper_close()
+        # gripper_open()
+        
+        # UR_set_up()
         # robot_turn()
         # robot_turn(0)
-        home()
-        test()
+        # home()
+        # test()
         # grid()
         # read_pos()
