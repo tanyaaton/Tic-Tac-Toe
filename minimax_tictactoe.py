@@ -69,25 +69,34 @@ def computer_move():
                 move = i
     board[move] = "O"
     print("Computer chooses position:", move + 1)
+    computer_position = move + 1
+    return computer_position
+
+def urarm_move(player, position):
+    return None
+
 
 # Main game loop
 def play_game():
     print("Welcome to Tic-Tac-Toe!")
     display_board()
+
+    print('hello')
     
     while True:
         # Player's turn
         while True:
             try:
-                user_move = int(input("Choose your position (1-9): ")) - 1
-                if user_move in range(9) and board[user_move] == " ":
-                    board[user_move] = "X"
+                user_pos = int(input("Choose your position (1-9): ")) - 1
+                if user_pos in range(9) and board[user_pos] == " ":
+                    board[user_pos] = "X"
                     break
                 else:
                     print("Position already taken or invalid. Try again.")
             except ValueError:
                 print("Invalid input. Please enter a number between 1 and 9.")
         
+        urarm_move('human',user_pos)
         display_board()
         
         # Check if player wins
@@ -101,7 +110,8 @@ def play_game():
             break
         
         # Computer's turn
-        computer_move()
+        computer_pos = computer_move()
+        urarm_move('robot',computer_pos)
         display_board()
         
         # Check if computer wins
