@@ -271,8 +271,8 @@ if __name__ == '__main__':
         # gripper_test()
         # gripper_close()
         # gripper_open()
-        
-        # UR_set_up()
+
+        UR_set_up()
         # robot_turn()
         # robot_turn(0)
         # home()

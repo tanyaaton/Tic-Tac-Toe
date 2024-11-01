@@ -101,7 +101,7 @@ def play_game():
             break
         
         # Computer's turn
-        computer_move()
+        print('hello')
         display_board()
         
         # Check if computer wins
