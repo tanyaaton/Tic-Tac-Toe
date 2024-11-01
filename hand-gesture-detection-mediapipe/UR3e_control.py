@@ -266,7 +266,7 @@ def gripper_close():
 def gripper_open():
         gripper.control(0)
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
         # gripper_connection()
         # gripper_test()
         # gripper_close()
