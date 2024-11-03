@@ -166,16 +166,16 @@ def grid():
 #####################################################################################################################
 
 position = {
-    "p0": "p[0.0818, 0.4126, 0.4305, -1.572, 0, 0]",
-    "p1": "p[-0.1, 0.0, 0.1,  0.0, 0.0, 0.0]",
-    "p2": "p[0.0,  0.0, 0.1,  0,   0.0, 0.0]",
-    "p3": "p[0.1,  0.0, 0.1,  0.0, 0.0, 0.0]",
-    "p4": "p[-0.1, 0.0, 0.0,  0.0, 0.0, 0.0]",
-    "p5": "p[0.0,  0.0, 0.0,  0.0, 0.0, 0.0]",
-    "p6": "p[0.1,  0.0, 0.0,  0.0, 0.0, 0.0]",
-    "p7": "p[-0.1, 0.0, -0.1,  0.0, 0.0, 0.0]",
-    "p8": "p[0.0,  0.0, -0.1,  0.0, 0.0, 0.0]",
-    "p9": "p[0.1,  0.0, -0.1,  0.0, 0.0, 0.0]",
+    "0": "p[0.0818, 0.4126, 0.4305, -1.572, 0, 0]",
+    "1": "p[-0.1, 0.0, 0.1,  0.0, 0.0, 0.0]",
+    "2": "p[0.0,  0.0, 0.1,  0,   0.0, 0.0]",
+    "3": "p[0.1,  0.0, 0.1,  0.0, 0.0, 0.0]",
+    "4": "p[-0.1, 0.0, 0.0,  0.0, 0.0, 0.0]",
+    "5": "p[0.0,  0.0, 0.0,  0.0, 0.0, 0.0]",
+    "6": "p[0.1,  0.0, 0.0,  0.0, 0.0, 0.0]",
+    "7": "p[-0.1, 0.0, -0.1,  0.0, 0.0, 0.0]",
+    "8": "p[0.0,  0.0, -0.1,  0.0, 0.0, 0.0]",
+    "9": "p[0.1,  0.0, -0.1,  0.0, 0.0, 0.0]",
 }
 
 position_X = {
@@ -210,17 +210,18 @@ def draw_X():
 def draw_O():
         return None
 
-def player_turn(position, symbol):
-        move_to_position(position)
+def human_move(i, symbol):
+        move_to_position(position[i])
         if symbol == "X":
                 draw_X()
         elif symbol == "O":
                 draw_O()
         return None
 
-def robot_turn(position, symbol):
+def robot_move(i, symbol):
         #xo algorithm
-        move_to_position(position)
+        move_to_position(position[i])
+        move_in()
         if symbol == "X":
                 draw_X()
         elif symbol == "O":
@@ -266,7 +267,7 @@ def gripper_close():
 def gripper_open():
         gripper.control(0)
 
-# if __name__ == '__main__':
+if __name__ == '__main__':
         # gripper_connection()
         # gripper_test()
         # gripper_close()
@@ -275,7 +276,7 @@ def gripper_open():
         UR_set_up()
         # robot_turn()
         # robot_turn(0)
-        # home()
+        home()
         # test()
         # grid()
         # read_pos()
