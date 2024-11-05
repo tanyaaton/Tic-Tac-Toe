@@ -69,6 +69,7 @@ def computer_move():
                 move = i
     board[move] = "O"
     print("Computer chooses position:", move + 1)
+    return move + 1
 
 # Main game loop
 def play_game():

@@ -86,43 +86,36 @@ def read_pos():
                 print ('Wrist 3'  +  '%20s' % str(joint_deg[5]))
                 print ('****************************************\n')
                 time.sleep(1)
-
-def robot_turn(input_int):
-        # read_pos()
-        if input_int == 0:
-                print("Zero command")
-                cmd_move = str.encode('x = get_actual_joint_positions()\n')
-                s.send(cmd_move)
-                cmd_move = str.encode('movej([x[0],x[1],x[2],x[3],x[4],x[5]+0.05]), 0.5, 0.2,0.01, 0.1, 300)\n')
-                s.send(cmd_move)
-        if input_int == 1:
-                print("First command")
-                s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0.03,0,0,0,0,0]),0.5,0.2,0,0)\n')
-                time.sleep(0.5)
-        if input_int == 2:
-                print("Second command")
-                s.send(b'movel(pose_add(get_actual_tcp_pose(),p[-0.03,0,0,0,0,0]),0.5,0.2,0,0)\n')
-                time.sleep(0.5)
+#####################################################################################################################
 def home():
         count = 0
-        while count < 7000:
-                print("First command")
-                # radians_list = [round(math.radians(degree), 3) for degree in [-90, -90, -90, -90, 90, 0]]
-                radians_list = [round(math.radians(degree), 3) for degree in [90, -90, -90, 0, 90, 360]]
+        while count < 5000:
+                # radians_list = [round(math.radians(degree), 3) for degree in [-90, -90, -90, -90, 90, 0]] #Home1
+                radians_list = [round(math.radians(degree), 3) for degree in [90, -90, -90, 0, 90, 360]] #Home2
                 cmd_move = str.encode(f'servoj({radians_list}, 0, 0,0.01, 0.1, 100)\n')
                 s.send(cmd_move)
-                print("Done send command")
                 count += 1
-        print("Home command")
+        print('Wait five second')
+        time.sleep(5)
+        print("Home command done")
+
+def send_nothing():
+        s.send(b'\n')
+        print("Nothing")
 
 def play_position():
         # s.send(b'movel(p[0.0818,0.4126,0.4305, -1.572, 0, 0],1,0.2,0,0)\n')
         # y -5
         cmb_move = str.encode('movel(p[0.0818,0.4126,0.4305, -1.572, 0, 0],1,0.2,0,0)\n')
         s.send(cmb_move)
-        time.sleep(4) 
+        print("Play position")
+        time.sleep(2) 
 
-
+def play_position_fromhome():
+        cmb_move = str.encode('movel(pose_add(get_actual_tcp_pose(),p[-0.05,-0.05,-0.05,0,0,0]),1,0.2,0,0)\n')
+        s.send(cmb_move)
+        print("Play position")
+        time.sleep(1) 
 
 def grid():
         # First Hori. line
@@ -183,7 +176,6 @@ position_X = {
     "q2": "p[-0.02,  0.0, -0.02,  0.0, 0.0, 0.0]",
     "q3": "p[0.0, 0.0, 0.02828,  0.0, 0.0, 0.0]",
     "q4": "p[0.02, 0.0, -0.02,  0.0, 0.0, 0.0]"
-
 }
 
 def relative_command(p):
@@ -207,27 +199,42 @@ def draw_X():
         move_to_position(position_X["q4"])
         return None
 
-def draw_O():
-        return None
+# def draw_O():
+#         radius = 0.05  # Radius of the circle
+#         center = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]  # Center of the circle
+#         num_points = 10  # Number of points to approximate the circle
+
+#         for i in range(num_points):
+#                 angle = 2 * math.pi * i / num_points
+#                 x = center[0] + radius * math.cos(angle)
+#                 y = center[1] + radius * math.sin(angle)
+#                 position = f"p[{x}, {y}, {center[2]}, {center[3]}, {center[4]}, {center[5]}]"
+#                 move_to_position(position)
+#                 time.sleep(0.1)  # Small delay between movements
+#         play_position()
 
 def human_move(i, symbol):
-        move_to_position(position[i])
-        if symbol == "X":
-                draw_X()
-        elif symbol == "O":
-                draw_O()
-        return None
-
-def robot_move(i, symbol):
-        #xo algorithm
-        move_to_position(position[i])
+        time.sleep(1)
+        move_to_position(position[str(i)])
+        time.sleep(1)
         move_in()
         if symbol == "X":
                 draw_X()
         elif symbol == "O":
                 draw_O()
-        return None
+        play_position()
 
+def robot_move(i, symbol):
+        #xo algorithm
+        time.sleep(1)
+        move_to_position(position[str(i)])
+        time.sleep(1)
+        move_in()
+        if symbol == "X":
+                draw_X()
+        elif symbol == "O":
+                draw_O()
+        play_position()
 
 
 def test():
@@ -242,14 +249,15 @@ def test():
         # s.send(b'movel(pose_add(get_actual_tcp_pose(),p[-0.05,-0.05,-0.05,0,0,0]),1,0.25,0,0)\n')     
         # time.sleep(1) 
         play_position()
-        i=1
-        print(f"p{i}")
-        print(position[f"p{i}"])
-        move_to_position(position[f"p{i}"])
-        move_in()
-        draw_X()
-        print("Done")
-        play_position()
+        # i=1
+        # print(f"p{i}")
+        # print(position[f"p{i}"])
+        # move_to_position(position[f"p{i}"])
+        # move_in()
+        # draw_X()
+        # print("Done")
+        # play_position()
+        print(position_X)
 
 def gripper_connection():
         global gripper
@@ -274,9 +282,12 @@ if __name__ == '__main__':
         # gripper_open()
 
         UR_set_up()
-        # robot_turn()
-        # robot_turn(0)
         home()
+        draw_O()
+        # play_position()
+        # robot_move(1, 'X')
+        # play_position()
         # test()
         # grid()
         # read_pos()
+        # human_move(0, 'X')
