@@ -29,10 +29,10 @@ def play_game():
         while True:
             try:
                 command = client_socket.recv(1024).decode()
-                while command[-1].isdigit():
-                    print(f"Received Command: {command[-1]}")
-                    user_pos = int(command[-1]) - 1
-                    break
+                while not(command[-1].isdigit()):
+                    command = client_socket.recv(1024).decode()
+                print(f"Received Command: {command[-1]}")
+                user_pos = int(command[-1]) - 1
                 # user_pos = int(input("Choose your position (1-9): ")) - 1
                 if user_pos in range(9) and board[user_pos] == " ":
                     board[user_pos] = "X"
