@@ -10,7 +10,7 @@ def start_client():
         if command[-1].isdigit():
             print(f"Received Command: {command[-1]}")
             # Perform actions based on the received command
-            time.sleep(3)
+            # time.sleep(3)
     client_socket.close()
 
 if __name__ == "__main__":

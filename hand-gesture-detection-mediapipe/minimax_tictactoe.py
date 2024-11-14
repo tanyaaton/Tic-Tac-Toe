@@ -116,4 +116,4 @@ def play_game():
             break
 
 # # Start the game
-# play_game()
+play_game()
