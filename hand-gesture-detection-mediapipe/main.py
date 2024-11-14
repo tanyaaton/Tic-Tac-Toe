@@ -11,7 +11,11 @@ from gripper import Gripper
 
 from minimax_tictactoe import display_board, check_winner, is_board_full, board, computer_move
 
-
+def server_connection():
+    global client_socket
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client_socket.connect(('localhost', 12345))
+    print("Connected to the server.")
 
 def play_game():
     print("Welcome to Tic-Tac-Toe!")
@@ -21,9 +25,15 @@ def play_game():
     display_board()
     while True:
         # Player's turn
+        command = client_socket.recv(1024).decode() # Receive command from server(Flush)
         while True:
             try:
-                user_pos = int(input("Choose your position (1-9): ")) - 1
+                command = client_socket.recv(1024).decode()
+                while command[-1].isdigit():
+                    print(f"Received Command: {command[-1]}")
+                    user_pos = int(command[-1]) - 1
+                    break
+                # user_pos = int(input("Choose your position (1-9): ")) - 1
                 if user_pos in range(9) and board[user_pos] == " ":
                     board[user_pos] = "X"
                     break
@@ -64,9 +74,9 @@ def play_game():
 
 
 if __name__ == '__main__':
+        server_connection()
         UR_set_up()
         home()
-        time.sleep(3)
         grid()
         # test()
         play_position()

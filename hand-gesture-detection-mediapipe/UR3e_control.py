@@ -88,15 +88,10 @@ def read_pos():
                 time.sleep(1)
 #####################################################################################################################
 def home():
-        count = 0
-        while count < 5000:
-                # radians_list = [round(math.radians(degree), 3) for degree in [-90, -90, -90, -90, 90, 0]] #Home1
-                radians_list = [round(math.radians(degree), 3) for degree in [90, -90, -90, 0, 90, 360]] #Home2
-                cmd_move = str.encode(f'servoj({radians_list}, 0, 0,0.01, 0.1, 100)\n')
-                s.send(cmd_move)
-                count += 1
-        print('Wait five second')
-        time.sleep(5)
+        radians_list = [round(math.radians(degree), 3) for degree in [90, -90, -90, 0, 90, 360]] #Home2
+        cmd_move = str.encode(f'movej({radians_list},1, 1)\n')
+        s.send(cmd_move)
+        time.sleep(2)
         print("Home command done")
 
 def send_nothing():
@@ -236,41 +231,25 @@ def draw_Tri():
         return None
 
 def draw_O():
-        radius = 0.02  # Radius of the circle
+        radius = 0.04  # Radius of the circle
         #move-up and waypoint1
-        # cmd_move = relative_command(f'p[{radius}, 0.0, {radius},  0.0, 0.0, 0.0]')
-        # s.send(cmd_move)
-        # time.sleep(1)
+        cmd_move = relative_command(f'p[0, 0.0, {radius},  0.0, 0.0, 0.0]')
+        s.send(cmd_move)
+        time.sleep(1)
         #Waypoint2
         cmd_move = str.encode(f'movep(get_actual_tcp_pose(),0.1,0.1,r={radius})\n')
         s.send(cmd_move)
-        time.sleep(1)
+        time.sleep(3)
         #waypoint3
-        cmd_move = str.encode(f'movec(pose_add(get_actual_tcp_pose(),p[-1*{radius}, 0.0, -1*{radius},  0.0, 0.0, 0.0]),pose_add(get_actual_tcp_pose(),p[1*{radius}, 0.0, -1*{radius},  0.0, 0.0, 0.0]),0.1,0.1,r=0.015)\n')
+        cmd_move = str.encode(f'movec(pose_add(get_actual_tcp_pose(),p[-1*{radius}, 0.0, -1*{radius},  0.0, 0.0, 0.0]),pose_add(get_actual_tcp_pose(),p[0, 0.0, -2*{radius},  0.0, 0.0, 0.0]),0.1,0.05,r=0,mode=0)\n')
         s.send(cmd_move)
-        time.sleep(1)
+        time.sleep(3)
         #waypoint4
-        cmd_move = str.encode(f'movec(pose_add(get_actual_tcp_pose(),p[{radius}, 0.0, 1*{radius},  0.0, 0.0, 0.0]),pose_add(get_actual_tcp_pose(),p[-1*{radius}, 0.0, 1*{radius},  0.0, 0.0, 0.0]),0.1,0.1,r=0.015)\n')
+        cmd_move = str.encode(f'movec(pose_add(get_actual_tcp_pose(),p[1*{radius}, 0.0, 1*{radius},  0.0, 0.0, 0.0]),pose_add(get_actual_tcp_pose(),p[0, 0.0, 2*{radius},  0.0, 0.0, 0.0]),0.1,0.05,r=0,mode=0)\n')
         s.send(cmd_move)
         time.sleep(1)
-        #waypoint5
-        cmd_move = str.encode(f'movec(pose_add(get_actual_tcp_pose(),p[-1*{radius}, 0.0, -1*{radius},  0.0, 0.0, 0.0]),pose_add(get_actual_tcp_pose(),p[1*{radius}, 0.0, -1*{radius},  0.0, 0.0, 0.0]),0.1,0.1,r=0.015)\n')
-        s.send(cmd_move)
-        time.sleep(1)
-        # # Waypoint2
-        # cmd_move = str.encode(f'movec(get_actual_tcp_pose(),pose_add(get_actual_tcp_pose(),p[{radius}, 0.0, -1*{radius},  0.0, 0.0, 0.0]),0.1,0.1,{radius},0)\n')
-        # s.send(cmd_move)
-        # time.sleep(1)
-        # #waypoint3
-        # cmd_move = str.encode(f'movec(get_actual_tcp_pose(),pose_add(get_actual_tcp_pose(),p[-1*{radius}, 0.0, -1*{radius},  0.0, 0.0, 0.0]),0.1,0.1,{radius},0)\n')
-        # s.send(cmd_move)
-        # time.sleep(1)
-        # #waypoint4
-        # cmd_move = str.encode(f'movec(get_actual_tcp_pose(),pose_add(get_actual_tcp_pose(),p[-1*{radius}, 0.0, {radius},  0.0, 0.0, 0.0]),0.1,0.1,{radius},0)\n')
-        # s.send(cmd_move)
-        # time.sleep(1)
         # #waypoint5
-        # cmd_move = str.encode(f'movec(get_actual_tcp_pose(),pose_add(get_actual_tcp_pose(),p[{radius}, 0.0, {radius},  0.0, 0.0, 0.0]),0.1,0.1,{radius},0)\n')
+        # cmd_move = str.encode(f'movec(pose_add(get_actual_tcp_pose(),p[-1*{radius}, 0.0, -1*{radius},  0.0, 0.0, 0.0]),pose_add(get_actual_tcp_pose(),p[1*{radius}, 0.0, -1*{radius},  0.0, 0.0, 0.0]),0.1,0.1,r=0.015)\n')
         # s.send(cmd_move)
         # time.sleep(1)
 
@@ -309,16 +288,9 @@ def test():
         # time.sleep(1)
         # s.send(b'movel(pose_add(get_actual_tcp_pose(),p[-0.05,-0.05,-0.05,0,0,0]),1,0.25,0,0)\n')     
         # time.sleep(1) 
-        play_position()
-        # i=1
-        # print(f"p{i}")
-        # print(position[f"p{i}"])
-        # move_to_position(position[f"p{i}"])
-        # move_in()
-        # draw_X()
-        # print("Done")
-        # play_position()
-        print(position_X)
+        radians_list = [round(math.radians(degree), 3) for degree in [90, -90, -90, 0, 90, 360]] #Home2
+        cmd_move = str.encode(f'movej({radians_list},1, 1)\n')
+        s.send(cmd_move)
 
 def gripper_connection():
         global gripper
@@ -363,12 +335,12 @@ if __name__ == '__main__':
         # draw_X()
         # play_position()
         # draw_Tri()
-        draw_O()
+        # draw_O()
         
-        # play_position()
+        play_position()
         # robot_move(1, 'X')
         # play_position()
         # test()
         # grid()
         # read_pos()
-        # human_move(0, 'X')
+        human_move(1, 'X')
