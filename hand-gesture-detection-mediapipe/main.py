@@ -7,7 +7,6 @@ from pymodbus.client import ModbusTcpClient
 import socket, struct, time
 import numpy,time
 from gripper import Gripper
-<<<<<<< HEAD
 import boto3
 from uuid import uuid4
 from minimax_tictactoe import display_board, check_winner, is_board_full, board, computer_move
@@ -15,14 +14,12 @@ from minimax_tictactoe import display_board, check_winner, is_board_full, board,
 #-------fill in this part after we have front end-------
 #receivee player name from front end
 #player_name = ???? 
-=======
 
 def server_connection():
     global client_socket
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect(('localhost', 12345))
     print("Connected to the server.")
->>>>>>> d9a275cbc427c85f4282cfec6532217fb25176e8
 
 def play_game():
     print("Welcome to Tic-Tac-Toe!")
