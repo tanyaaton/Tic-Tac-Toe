@@ -8,10 +8,13 @@ from pymodbus.client import ModbusTcpClient
 import numpy,time
 import math
 from gripper import Gripper
-
+import boto3
+from uuid import uuid4
 from minimax_tictactoe import display_board, check_winner, is_board_full, board, computer_move
 
-
+#-------fill in this part after we have front end-------
+#receivee player name from front end
+#player_name = ???? 
 
 def play_game():
     print("Welcome to Tic-Tac-Toe!")
@@ -33,6 +36,7 @@ def play_game():
                 print("Invalid input. Please enter a number between 1 and 9.")
         
         print("user_pos", user_pos+1)
+        move += 1 #add 1 move to player's record
         human_move(user_pos+1, 'X')
         play_position()
         display_board()
@@ -40,11 +44,15 @@ def play_game():
         # Check if player wins
         if check_winner("X"):
             print("Congratulations! You win!")
+            #player win computer by int(move) moves
+            save_game_history(player_name,"Robot",player_name,move)
             break
         
         # Check if it's a tie
         if is_board_full():
             print("It's a tie!")
+             #player ties computer by int(move) moves
+            save_game_history(player_name,"Robot","Draw",move)
             break
         
         # Computer's turn
@@ -55,6 +63,7 @@ def play_game():
         # Check if computer wins
         if check_winner("O"):
             print("Computer wins! Better luck next time!")
+            save_game_history(player_name,"Robot","Robot",move)
             break
         
         # Check if it's a tie
@@ -62,11 +71,32 @@ def play_game():
             print("It's a tie!")
             break
 
+# Function to save win/loss history and total moves
+def save_game_history(player1, player2, winner, total_moves):
+    game_id = str(uuid4())  # Generate a unique game ID
+    item = {
+        'GameID': game_id,
+        'Player1': player1,
+        'Player2': player2,
+        'Winner': winner,
+        'TotalMoves': total_moves
+    }
+    
+    try:
+        table.put_item(Item=item)
+        print(f"Game {game_id} saved successfully.")
+    except Exception as e:
+        print(f"Error saving game history: {e}")
+
 
 if __name__ == '__main__':
         UR_set_up()
         home()
         # test()
         # play_position()
+        #------initialize dynamodb client------
+        dynamodb = boto3.resource('dynamodb', region_name='ap-southeast-1')  
+        table = dynamodb.Table('TicTacToeGameHistory')
+        move_count = 0
         play_game()
         # robot_move(1, 'X')
