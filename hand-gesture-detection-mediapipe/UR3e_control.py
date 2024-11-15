@@ -12,7 +12,7 @@ def UR_set_up():
         global tcp, joint_rad, joint_deg, joint_rev
         robot = '10.10.0.61'
         port = 30003
-        gripper_port    = 63352
+        gripper_port  = 63352
         tcp = {}
         joint_rad = {}
         joint_deg = {}
@@ -33,6 +33,24 @@ def UR_set_up():
                 print ('Connection established')
         else :
                 print ('Connection failed')
+
+def gripper_connection():
+        global gripper
+        gripper = Gripper('10.10.0.61', 63352)
+        gripper.connection()
+
+def gripper_test():
+        gripper.control(255)
+        time.sleep(3)
+        gripper.control(0)
+
+def gripper_close():
+        gripper.control(255)
+
+def gripper_open():
+        gripper.control(0)
+
+
 #####################################################################################################################
                 
 def read_pos():
@@ -88,15 +106,10 @@ def read_pos():
                 time.sleep(1)
 #####################################################################################################################
 def home():
-        count = 0
-        while count < 5000:
-                # radians_list = [round(math.radians(degree), 3) for degree in [-90, -90, -90, -90, 90, 0]] #Home1
-                radians_list = [round(math.radians(degree), 3) for degree in [90, -90, -90, 0, 90, 360]] #Home2
-                cmd_move = str.encode(f'servoj({radians_list}, 0, 0,0.01, 0.1, 100)\n')
-                s.send(cmd_move)
-                count += 1
-        print('Wait five second')
-        time.sleep(5)
+        radians_list = [round(math.radians(degree), 3) for degree in [90, -90, -90, 0, 90, 360]] #Home2
+        cmd_move = str.encode(f'movej({radians_list},1, 1)\n')
+        s.send(cmd_move)
+        time.sleep(2)
         print("Home command done")
 
 def send_nothing():
@@ -106,10 +119,14 @@ def send_nothing():
 def play_position():
         # s.send(b'movel(p[0.0818,0.4126,0.4305, -1.572, 0, 0],1,0.2,0,0)\n')
         # y -5
-        cmb_move = str.encode('movel(p[0.0818,0.4126,0.4305, -1.572, 0, 0],1,0.2,0,0)\n')
-        s.send(cmb_move)
+        movel("p[0.0818,0.4126,0.4305, -1.572, 0, 0]")
         print("Play position")
-        time.sleep(2) 
+        time.sleep(1) 
+
+def movel(p):
+        cmb_move = str.encode(f'movel({str(p)},1,0.2,0,0)\n')
+        s.send(cmb_move)
+        time.sleep(1) 
 
 def play_position_fromhome():
         cmb_move = str.encode('movel(pose_add(get_actual_tcp_pose(),p[-0.05,-0.05,-0.05,0,0,0]),1,0.2,0,0)\n')
@@ -120,40 +137,52 @@ def play_position_fromhome():
 def grid():
         # First Hori. line
         time.sleep(1)
+        move_out()
+        time.sleep(1)
         s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0.1,0,0,0,0,0]),1,0.2,0,0)\n')
+        time.sleep(1)
+        move_in()
         time.sleep(2)   
         s.send(b'movel(pose_add(get_actual_tcp_pose(),p[-0.1,0,0,0,0,0]),1,0.2,0,0)\n')     
         time.sleep(2)  
         s.send(b'movel(pose_add(get_actual_tcp_pose(),p[-0.2,0,0,0,0,0]),1,0.2,0,0)\n')
         time.sleep(3) 
+        move_out()
         s.send(b'movel(p[0.1318,0.4625, 0.4805, -1.572, 0, 0],1,0.2,0,0)\n')
         time.sleep(3)  
         # Second Hori. line  
         s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0,-0.1,0,0,0]),1,0.25,0,0)\n')
         time.sleep(1)
         s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0.1,0,0,0,0,0]),1,0.2,0,0)\n')
-        time.sleep(2)   
+        time.sleep(1)
+        move_in()
+        time.sleep(1)   
         s.send(b'movel(pose_add(get_actual_tcp_pose(),p[-0.1,0,0,0,0,0]),1,0.2,0,0)\n')     
         time.sleep(2)  
         s.send(b'movel(pose_add(get_actual_tcp_pose(),p[-0.2,0,0,0,0,0]),1,0.2,0,0)\n')
         time.sleep(2)
+        move_out()
         s.send(b'movel(p[0.1318,0.4625, 0.3805, -1.572, 0, 0],1,0.2,0,0)\n')
         time.sleep(3)  
         #First vertical line
         s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0,-0.1,0,0,0]),1,0.2,0,0)\n')
         time.sleep(2)   
+        move_in()
         s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0,0.3,0,0,0]),1,0.2,0,0)\n')     
-        time.sleep(3)  
-        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0,-0.1,0,0,0]),1,0.2,0,0)\n')
         time.sleep(3) 
+        move_out() 
+        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0,-0.1,0,0,0]),1,0.2,0,0)\n')
+        time.sleep(2) 
         #Second vertical line
         s.send(b'movel(pose_add(get_actual_tcp_pose(),p[-0.1,0,0,0,0,0]),1,0.2,0,0)\n')
         time.sleep(2)   
         s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0,0.1,0,0,0]),1,0.2,0,0)\n')
+        time.sleep(1)
+        move_in()
         time.sleep(2)   
         s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0,-0.3,0,0,0]),1,0.2,0,0)\n')     
         time.sleep(3)  
-        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0.05,0.1,0,0,0]),1,0.2,0,0)\n')
+        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,-0.05,0.1,0,0,0]),1,0.2,0,0)\n')
         time.sleep(3) 
         play_position()
 #####################################################################################################################
@@ -171,12 +200,67 @@ position = {
     "9": "p[0.1,  0.0, -0.1,  0.0, 0.0, 0.0]",
 }
 
+# position_X = {
+#     "q1": "p[0.02, 0.0, 0.02,  0.0, 0.0, 0.0]",
+#     "q2": "p[-0.02,  0.0, -0.02,  0.0, 0.0, 0.0]",
+#     "q3": "p[0.0, 0.0, 0.02828,  0.0, 0.0, 0.0]",
+#     "q4": "p[0.02, 0.0, -0.02,  0.0, 0.0, 0.0]"
+# }
 position_X = {
-    "q1": "p[0.02, 0.0, 0.02,  0.0, 0.0, 0.0]",
-    "q2": "p[-0.02,  0.0, -0.02,  0.0, 0.0, 0.0]",
-    "q3": "p[0.0, 0.0, 0.02828,  0.0, 0.0, 0.0]",
-    "q4": "p[0.02, 0.0, -0.02,  0.0, 0.0, 0.0]"
+    "q1": "p[0.02828, 0.0, 0.02828,  0.0, 0.0, 0.0]",
+    "q2": "p[-0.02828*2,  0.0, -0.02828*2,  0.0, 0.0, 0.0]",
+    "q3": "p[0.0, 0.0, 0.02828*2,  0.0, 0.0, 0.0]",
+    "q4": "p[0.02828*2, 0.0, -0.02828*2,  0.0, 0.0, 0.0]"
 }
+
+position_T = {
+        "q0_1": "p[0, 0.0, -0.02,  0.0, 0.0, 0.0]",
+        "q0_2": "p[0.02, 0.0, 0,  0.0, 0.0, 0.0]",
+        "q1": "p[-0.02, 0.0, 0.04,  0.0, 0.0, 0.0]",
+        "q2": "p[-0.02,  0.0, -0.04,  0.0, 0.0, 0.0]",
+        "q3": "p[0.04, 0.0, 0,  0.0, 0.0, 0.0]"
+}
+
+
+def draw_X():
+        move_to_position(position_X["q1"])
+        move_to_position(position_X["q2"])
+        move_out()
+        move_to_position(position_X["q3"])
+        move_in()
+        move_to_position(position_X["q4"])
+        return None
+
+def draw_Tri():
+        move_to_position(position_T["q0_1"])
+        move_to_position(position_T["q0_2"])
+        move_to_position(position_T["q1"])
+        move_to_position(position_T["q2"])
+        move_to_position(position_T["q3"])
+        return None
+
+def draw_O():
+        radius = 0.04  # Radius of the circle
+        #move-up and waypoint1
+        cmd_move = relative_command(f'p[0, 0.0, {radius},  0.0, 0.0, 0.0]')
+        s.send(cmd_move)
+        time.sleep(1)
+        #Waypoint2
+        cmd_move = str.encode(f'movep(get_actual_tcp_pose(),0.1,0.1,r={radius})\n')
+        s.send(cmd_move)
+        time.sleep(3)
+        #waypoint3
+        cmd_move = str.encode(f'movec(pose_add(get_actual_tcp_pose(),p[-1*{radius}, 0.0, -1*{radius},  0.0, 0.0, 0.0]),pose_add(get_actual_tcp_pose(),p[0, 0.0, -2*{radius},  0.0, 0.0, 0.0]),0.1,0.05,r=0,mode=0)\n')
+        s.send(cmd_move)
+        time.sleep(3)
+        #waypoint4
+        cmd_move = str.encode(f'movec(pose_add(get_actual_tcp_pose(),p[1*{radius}, 0.0, 1*{radius},  0.0, 0.0, 0.0]),pose_add(get_actual_tcp_pose(),p[0, 0.0, 2*{radius},  0.0, 0.0, 0.0]),0.1,0.05,r=0,mode=0)\n')
+        s.send(cmd_move)
+        time.sleep(1)
+        # #waypoint5
+        # cmd_move = str.encode(f'movec(pose_add(get_actual_tcp_pose(),p[-1*{radius}, 0.0, -1*{radius},  0.0, 0.0, 0.0]),pose_add(get_actual_tcp_pose(),p[1*{radius}, 0.0, -1*{radius},  0.0, 0.0, 0.0]),0.1,0.1,r=0.015)\n')
+        # s.send(cmd_move)
+        # time.sleep(1)
 
 def relative_command(p):
     return str.encode(f'movel(pose_add(get_actual_tcp_pose(),{p}),1,0.2,0,0)\n')
@@ -190,29 +274,10 @@ def move_in():
         s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0.05,0,0,0,0]),1,0.25,0,0)\n')
         time.sleep(1)
 
-
-
-def draw_X():
-        move_to_position(position_X["q1"])
-        move_to_position(position_X["q2"])
-        move_to_position(position_X["q3"])
-        move_to_position(position_X["q4"])
-        return None
-
-# def draw_O():
-#         radius = 0.05  # Radius of the circle
-#         center = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]  # Center of the circle
-#         num_points = 10  # Number of points to approximate the circle
-
-#         for i in range(num_points):
-#                 angle = 2 * math.pi * i / num_points
-#                 x = center[0] + radius * math.cos(angle)
-#                 y = center[1] + radius * math.sin(angle)
-#                 position = f"p[{x}, {y}, {center[2]}, {center[3]}, {center[4]}, {center[5]}]"
-#                 move_to_position(position)
-#                 time.sleep(0.1)  # Small delay between movements
-#         play_position()
-
+def move_out():
+        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,-0.05,0,0,0,0]),1,0.25,0,0)\n')
+        time.sleep(1)
+        
 def human_move(i, symbol):
         time.sleep(1)
         move_to_position(position[str(i)])
@@ -238,56 +303,43 @@ def robot_move(i, symbol):
 
 
 def test():
-        # s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0.05,0,0,0,0,0]),1,0.25,0,0)\n')
-        # time.sleep(1)
-        # s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0,0.05,0,0,0]),1,0.25,0,0)\n')
-        # time.sleep(1)
-        # s.send(b'movel(pose_add(get_actual_tcp_pose(),p[-0.05,0,0,0,0,0]),1,0.25,0,0)\n')
-        # time.sleep(1)
-        # s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0,-0.05,0,0,0]),1,0.25,0,0)\n')
-        # time.sleep(1)
-        # s.send(b'movel(pose_add(get_actual_tcp_pose(),p[-0.05,-0.05,-0.05,0,0,0]),1,0.25,0,0)\n')     
-        # time.sleep(1) 
-        play_position()
-        # i=1
-        # print(f"p{i}")
-        # print(position[f"p{i}"])
-        # move_to_position(position[f"p{i}"])
-        # move_in()
-        # draw_X()
-        # print("Done")
-        # play_position()
-        print(position_X)
+        radians_list = [round(math.radians(degree), 3) for degree in [90, -90, -90, 0, 90, 360]] #Home2
+        cmd_move = str.encode(f'movej({radians_list},1, 1)\n')
+        s.send(cmd_move)
 
-def gripper_connection():
-        global gripper
-        gripper = Gripper('10.10.0.61', 63352)
-        gripper.connection()
-
-def gripper_test():
-        gripper.control(255)
-        time.sleep(3)
-        gripper.control(0)
-
-def gripper_close():
-        gripper.control(255)
-
-def gripper_open():
-        gripper.control(0)
+position = {
+    "0": "p[0.073, -0.269, 0.3046, 3, 0, 0]",
+    "1": "p[-0.1, 0.0, 0.1,  0.0, 0.0, 0.0]",
+    "2": "p[0.0,  0.0, 0.1,  0,   0.0, 0.0]",
+    "3": "p[0.1,  0.0, 0.1,  0.0, 0.0, 0.0]",
+    "4": "p[-0.1, 0.0, 0.0,  0.0, 0.0, 0.0]",
+    "5": "p[0.0,  0.0, 0.0,  0.0, 0.0, 0.0]",
+    "6": "p[0.1,  0.0, 0.0,  0.0, 0.0, 0.0]",
+    "7": "p[-0.1, 0.0, -0.1,  0.0, 0.0, 0.0]",
+    "8": "p[0.0,  0.0, -0.1,  0.0, 0.0, 0.0]",
+    "9": "p[0.1,  0.0, -0.1,  0.0, 0.0, 0.0]",
+}
 
 if __name__ == '__main__':
-        # gripper_connection()
         # gripper_test()
         # gripper_close()
         # gripper_open()
 
         UR_set_up()
+        gripper_connection()
+        gripper_open()
+        # time.sleep(3)
+        # gripper_close()
         home()
-        draw_O()
+        # draw_X()
+        # play_position()
+        # draw_Tri()
+        # draw_O()
+        
         # play_position()
         # robot_move(1, 'X')
         # play_position()
         # test()
         # grid()
         # read_pos()
-        # human_move(0, 'X')
+        # human_move(1, 'X')

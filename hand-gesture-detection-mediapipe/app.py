@@ -3,6 +3,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import socket, time, random
 
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
@@ -20,8 +21,6 @@ import mediapipe as mp
 from utils import CvFpsCalc
 from model import KeyPointClassifier
 from model import PointHistoryClassifier
-
-from UR3e_control import UR_set_up, robot_turn
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -56,7 +55,6 @@ def main():
     use_static_image_mode = args.use_static_image_mode
     min_detection_confidence = args.min_detection_confidence
     min_tracking_confidence = args.min_tracking_confidence
-    print("HI")
 
     use_brect = True
 
@@ -104,9 +102,17 @@ def main():
     finger_gesture_history = deque(maxlen=history_length)
 
     #  ########################################################################
+    #Start server
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.bind(('localhost', 12345))
+    server_socket.listen(1)
+    print("Server is waiting for a connection...")
+
+    conn, addr = server_socket.accept()
+    print(f"Connected to {addr}")
+    
     mode = 0
 
-    UR_set_up()
     while True:
         fps = cvFpsCalc.get()
 
@@ -153,10 +159,45 @@ def main():
                 hand_sign_id = keypoint_classifier(pre_processed_landmark_list)
                 if hand_sign_id == 2:  # Point gesture
                     point_history.append(landmark_list[8])
+
+                    #--------- locate pointer in the camera
+                    # print('landmark list', landmark_list)
+                    print('index finger position',landmark_list[8])
+                    range_x = 1279  #(0:left - 1279:right)
+                    range_y = 719   #(0:top - 719:bottom)
+                    x = landmark_list[8][0]
+                    y = landmark_list[8][1]
+                    if   x < range_x/3                  and y < range_y/3:
+                        command = "1"
+                        print(f"Sent Command: 1")
+                    elif range_x/3 < x < 2*range_x/3    and y < range_y/3:
+                        command = "2"
+                        print(f"Sent Command: 2")
+                    elif 2*range_x/3 < x < range_x      and y < range_y/3:
+                        command = "3"
+                        print(f"Sent Command: 3")
+                    elif x < range_x/3                  and range_y/3 < y < 2*range_y/3:
+                        command = "4"
+                        print(f"Sent Command: 4")
+                    elif range_x/3 < x < 2*range_x/3    and range_y/3 < y < 2*range_y/3:
+                        command = "5"
+                        print(f"Sent Command: 5")
+                    elif 2*range_x/3 < x < range_x      and range_y/3 < y < 2*range_y/3:
+                        command = "6"
+                        print(f"Sent Command: 6")
+                    elif x < range_x/3                  and 2*range_y/3 < y < range_y:
+                        command = "7"
+                        print(f"Sent Command: 7")
+                    elif range_x/3 < x < 2*range_x/3    and 2*range_y/3 < y < range_y:
+                        command = "8"
+                        print(f"Sent Command: 8")
+                    elif 2*range_x/3 < x < range_x      and 2*range_y/3 < y < range_y:
+                        command = "9"
+                        print(f"Sent Command: 9")
+                    conn.send(command.encode())
+
                 else:
                     point_history.append([0, 0])
-                print("Command:", hand_sign_id)  
-                robot_turn(hand_sign_id)  
 
                 # Finger gesture classification
                 finger_gesture_id = 0
