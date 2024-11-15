@@ -1,15 +1,12 @@
 # Main game loop
 board = [" " for _ in range(9)]
-from minimax_tictactoe import display_board, check_winner, is_board_full, computer_move
 from UR3e_control import robot_move, human_move, play_position, home, UR_set_up, test, grid
+from minimax_tictactoe import display_board, check_winner, is_board_full, board, computer_move
+from pymodbus.client import ModbusTcpClient
 
 import socket, struct, time
-from pymodbus.client import ModbusTcpClient
 import numpy,time
-import math
 from gripper import Gripper
-
-from minimax_tictactoe import display_board, check_winner, is_board_full, board, computer_move
 
 def server_connection():
     global client_socket
@@ -77,8 +74,9 @@ if __name__ == '__main__':
         server_connection()
         UR_set_up()
         home()
-        grid()
+        # grid()
         # test()
-        play_position()
+        # play_position()
         play_game()
         # robot_move(1, 'X')
+        

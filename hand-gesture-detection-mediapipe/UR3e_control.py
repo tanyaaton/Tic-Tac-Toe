@@ -33,6 +33,24 @@ def UR_set_up():
                 print ('Connection established')
         else :
                 print ('Connection failed')
+
+def gripper_connection():
+        global gripper
+        gripper = Gripper('10.10.0.61', 63352)
+        gripper.connection()
+
+def gripper_test():
+        gripper.control(255)
+        time.sleep(3)
+        gripper.control(0)
+
+def gripper_close():
+        gripper.control(255)
+
+def gripper_open():
+        gripper.control(0)
+
+
 #####################################################################################################################
                 
 def read_pos():
@@ -182,11 +200,17 @@ position = {
     "9": "p[0.1,  0.0, -0.1,  0.0, 0.0, 0.0]",
 }
 
+# position_X = {
+#     "q1": "p[0.02, 0.0, 0.02,  0.0, 0.0, 0.0]",
+#     "q2": "p[-0.02,  0.0, -0.02,  0.0, 0.0, 0.0]",
+#     "q3": "p[0.0, 0.0, 0.02828,  0.0, 0.0, 0.0]",
+#     "q4": "p[0.02, 0.0, -0.02,  0.0, 0.0, 0.0]"
+# }
 position_X = {
-    "q1": "p[0.02, 0.0, 0.02,  0.0, 0.0, 0.0]",
-    "q2": "p[-0.02,  0.0, -0.02,  0.0, 0.0, 0.0]",
-    "q3": "p[0.0, 0.0, 0.02828,  0.0, 0.0, 0.0]",
-    "q4": "p[0.02, 0.0, -0.02,  0.0, 0.0, 0.0]"
+    "q1": "p[0.02828, 0.0, 0.02828,  0.0, 0.0, 0.0]",
+    "q2": "p[-0.02828*2,  0.0, -0.02828*2,  0.0, 0.0, 0.0]",
+    "q3": "p[0.0, 0.0, 0.02828*2,  0.0, 0.0, 0.0]",
+    "q4": "p[0.02828*2, 0.0, -0.02828*2,  0.0, 0.0, 0.0]"
 }
 
 position_T = {
@@ -197,28 +221,13 @@ position_T = {
         "q3": "p[0.04, 0.0, 0,  0.0, 0.0, 0.0]"
 }
 
-def relative_command(p):
-    return str.encode(f'movel(pose_add(get_actual_tcp_pose(),{p}),1,0.2,0,0)\n')
-
-def move_to_position(p):
-    cmd_move = relative_command(p)
-    s.send(cmd_move)
-    time.sleep(1)
-
-def move_in():
-        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0.05,0,0,0,0]),1,0.25,0,0)\n')
-        time.sleep(1)
-
-def move_out():
-        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,-0.05,0,0,0,0]),1,0.25,0,0)\n')
-        time.sleep(1)
-
-
 
 def draw_X():
         move_to_position(position_X["q1"])
         move_to_position(position_X["q2"])
+        move_out()
         move_to_position(position_X["q3"])
+        move_in()
         move_to_position(position_X["q4"])
         return None
 
@@ -253,6 +262,22 @@ def draw_O():
         # s.send(cmd_move)
         # time.sleep(1)
 
+def relative_command(p):
+    return str.encode(f'movel(pose_add(get_actual_tcp_pose(),{p}),1,0.2,0,0)\n')
+
+def move_to_position(p):
+    cmd_move = relative_command(p)
+    s.send(cmd_move)
+    time.sleep(1)
+
+def move_in():
+        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0.05,0,0,0,0]),1,0.25,0,0)\n')
+        time.sleep(1)
+
+def move_out():
+        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,-0.05,0,0,0,0]),1,0.25,0,0)\n')
+        time.sleep(1)
+        
 def human_move(i, symbol):
         time.sleep(1)
         move_to_position(position[str(i)])
@@ -273,40 +298,14 @@ def robot_move(i, symbol):
         if symbol == "X":
                 draw_X()
         elif symbol == "O":
-                draw_Tri()
+                draw_O()
         play_position()
 
 
 def test():
-        # s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0.05,0,0,0,0,0]),1,0.25,0,0)\n')
-        # time.sleep(1)
-        # s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0,0.05,0,0,0]),1,0.25,0,0)\n')
-        # time.sleep(1)
-        # s.send(b'movel(pose_add(get_actual_tcp_pose(),p[-0.05,0,0,0,0,0]),1,0.25,0,0)\n')
-        # time.sleep(1)
-        # s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0,-0.05,0,0,0]),1,0.25,0,0)\n')
-        # time.sleep(1)
-        # s.send(b'movel(pose_add(get_actual_tcp_pose(),p[-0.05,-0.05,-0.05,0,0,0]),1,0.25,0,0)\n')     
-        # time.sleep(1) 
         radians_list = [round(math.radians(degree), 3) for degree in [90, -90, -90, 0, 90, 360]] #Home2
         cmd_move = str.encode(f'movej({radians_list},1, 1)\n')
         s.send(cmd_move)
-
-def gripper_connection():
-        global gripper
-        gripper = Gripper('10.10.0.61', 63352)
-        gripper.connection()
-
-def gripper_test():
-        gripper.control(255)
-        time.sleep(3)
-        gripper.control(0)
-
-def gripper_close():
-        gripper.control(255)
-
-def gripper_open():
-        gripper.control(0)
 
 position = {
     "0": "p[0.073, -0.269, 0.3046, 3, 0, 0]",
@@ -327,8 +326,8 @@ if __name__ == '__main__':
         # gripper_open()
 
         UR_set_up()
-        # gripper_connection()
-        # gripper_open()
+        gripper_connection()
+        gripper_open()
         # time.sleep(3)
         # gripper_close()
         home()
@@ -337,10 +336,10 @@ if __name__ == '__main__':
         # draw_Tri()
         # draw_O()
         
-        play_position()
+        # play_position()
         # robot_move(1, 'X')
         # play_position()
         # test()
         # grid()
         # read_pos()
-        human_move(1, 'X')
+        # human_move(1, 'X')
