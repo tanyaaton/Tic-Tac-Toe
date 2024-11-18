@@ -11,27 +11,33 @@ import boto3
 from uuid import uuid4
 from minimax_tictactoe import display_board, check_winner, is_board_full, board, computer_move
 
-#-------fill in this part after we have front end-------
-#receivee player name from front end
-#player_name = ???? 
 import pandas as pd
 import numpy as np
 
 import streamlit as st
 
 st.set_page_config(
-    page_title="Retrieval Augmented Generation",
+    page_title="Tic-Tac-Toe gane",
     page_icon="🎮",
-    layout="wide",
+    layout="centered",
     initial_sidebar_state="expanded"
 )
-st.header("Tic-Tac-Toe 🎮")
+st.title("Tic-Tac-Toe 🎮")
+
+player_name = st.text_input("Enter your name:")
 
 with st.sidebar:
-    st.title("🌷Welcome")
+    st.title(f"Welcome {player_name}")
     st.markdown('''
     This is your Tic-Tac-Toe game.
-    You can play with ROBOT!!!!
+    You can play with ROBOT!
+    
+    🎥💌🤖✨
+    ''')     
+    st.title('''To play:''')
+    st.markdown('''          
+    point your index finder to the position you want to play
+    The robot will draw the symbol for you ;)
     ''')
 
 empty_path = 'image/empty.png'
@@ -43,7 +49,6 @@ if 'table_container' not in st.session_state:
 
 path_list = [empty_path, empty_path, empty_path, empty_path, empty_path, empty_path, empty_path, empty_path, empty_path]
 
-player_name = 'kungking'
 def update_path_list(index, symbol):
     if symbol == 'X':
         path_list[index] = x_path
@@ -52,33 +57,34 @@ def update_path_list(index, symbol):
 
 def streamlit_display_table(path_list):
     with st.session_state.table_container.container():
-        col_width = 1
+        col_width = 1  # Adjusted column width for a smaller layout
+        image_width = 150  # Set smaller image width
         # First row
         col1, col2, col3 = st.columns([col_width, col_width, col_width])
         with col1:
-            st.image(path_list[0], width=200, use_column_width=True)
+            st.image(path_list[0], width=image_width, use_column_width=True)
         with col2:
-            st.image(path_list[1], width=200, use_column_width=True)
+            st.image(path_list[1], width=image_width, use_column_width=True)
         with col3:
-            st.image(path_list[2], width=200, use_column_width=True)
+            st.image(path_list[2], width=image_width, use_column_width=True)
 
         # Second row
-        col4, col5, col6 = st.columns(3)
+        col4, col5, col6 = st.columns([col_width, col_width, col_width])
         with col4:
-            st.image(path_list[3], width=200, use_column_width=True)
+            st.image(path_list[3], width=image_width, use_column_width=True)
         with col5:
-            st.image(path_list[4], width=200, use_column_width=True)
+            st.image(path_list[4], width=image_width, use_column_width=True)
         with col6:
-            st.image(path_list[5], width=200, use_column_width=True)
+            st.image(path_list[5], width=image_width, use_column_width=True)
 
         # Third row
-        col7, col8, col9 = st.columns(3)
+        col7, col8, col9 = st.columns([col_width, col_width, col_width])
         with col7:
-            st.image(path_list[6], width=200, use_column_width=True)
+            st.image(path_list[6], width=image_width, use_column_width=True)
         with col8:
-            st.image(path_list[7], width=200, use_column_width=True)
+            st.image(path_list[7], width=image_width, use_column_width=True)
         with col9:
-            st.image(path_list[8], width=200, use_column_width=True)
+            st.image(path_list[8], width=image_width, use_column_width=True)
 
 def streamlit_remove_table():
     """Clear the existing table display to prepare for a new one"""
@@ -134,14 +140,14 @@ def play_game():
         # Check if player wins
         if check_winner("X"):
             draw_end_line("X")
-            print("Congratulations! You win!")
-            #player win computer by int(move) moves
+            st.header("Congratulations! You win!")
+            # player win computer by int(move) moves
             save_game_history(player_name,"Robot",player_name,move)
             break
         
         # Check if it's a tie
         if is_board_full():
-            print("It's a tie!")
+            st.header("It's a tie!")
              #player ties computer by int(move) moves
             save_game_history(player_name,"Robot","Draw",move)
             play_position()
@@ -153,22 +159,26 @@ def play_game():
         streamlit_remove_table()
         update_path_list(computer_pos-1, 'O')
         streamlit_display_table(path_list)
-        robot_move(computer_pos, 'O')
+        # robot_move(computer_pos, 'O')
         display_board()
         
         # Check if computer wins
         if check_winner("O"):
             draw_end_line("O")
-            print("Computer wins! Better luck next time!")
+            st.header("Computer wins! Better luck next time!")
             save_game_history(player_name,"Robot","Robot",move)
             break
         
         # Check if it's a tie
         if is_board_full():
-            print("It's a tie!")
+            st.header("It's a tie!")
             play_position()
             home()
             break
+
+        # if st.button("Reset"):
+        #         st.session_state.clear()
+        #         streamlit_remove_table()
 
 # Function to save win/loss history and total moves
 def save_game_history(player1, player2, winner, total_moves):
@@ -180,7 +190,6 @@ def save_game_history(player1, player2, winner, total_moves):
         'Winner': winner,
         'TotalMoves': total_moves
     }
-    
     try:
         table.put_item(Item=item)
         print(f"Game {game_id} saved successfully.")
@@ -201,5 +210,5 @@ if __name__ == '__main__':
         table = dynamodb.Table('TicTacToeGameHistory')
         move_count = 0
         play_position()
-        play_game()
-        # robot_move(1, 'X')
+        if player_name:
+            play_game()
