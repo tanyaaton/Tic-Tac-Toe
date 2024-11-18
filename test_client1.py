@@ -7,10 +7,9 @@ def start_client():
 
     while True:
         command = client_socket.recv(1024).decode()
-        if command[-1].isdigit():
-            print(f"Received Command: {command[-1]}")
-            # Perform actions based on the received command
-            # time.sleep(3)
+        print(f"Received Command: {command}")
+        # Perform actions based on the received command
+        # time.sleep(3)
     client_socket.close()
 
 if __name__ == "__main__":

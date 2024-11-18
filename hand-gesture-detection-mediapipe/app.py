@@ -163,8 +163,8 @@ def main():
                     #--------- locate pointer in the camera
                     # print('landmark list', landmark_list)
                     print('index finger position',landmark_list[8])
-                    range_x = 1279  #(0:left - 1279:right)
-                    range_y = 719   #(0:top - 719:bottom)
+                    range_x = 959  #(0:left - 1279:right)
+                    range_y = 536   #(0:top - 719:bottom)
                     x = landmark_list[8][0]
                     y = landmark_list[8][1]
                     if   x < range_x/3                  and y < range_y/3:
