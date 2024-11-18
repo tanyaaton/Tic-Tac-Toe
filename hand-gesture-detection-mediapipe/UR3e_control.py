@@ -5,6 +5,7 @@ from pymodbus.client import ModbusTcpClient
 import numpy,time
 import math
 from gripper import Gripper
+from minimax_tictactoe import winner_row
 
 # from minimax_tictactoe import display_board, check_winner, is_board_full, board, computer_move
 
@@ -143,13 +144,11 @@ def grid():
         time.sleep(1)
         move_in()
         time.sleep(2)   
-        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[-0.1,0,0,0,0,0]),1,0.2,0,0)\n')     
-        time.sleep(2)  
-        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[-0.2,0,0,0,0,0]),1,0.2,0,0)\n')
+        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[-0.3,0,0,0,0,0]),1,0.2,0,0)\n')
         time.sleep(3) 
         move_out()
-        s.send(b'movel(p[0.1318,0.4625, 0.4805, -1.572, 0, 0],1,0.2,0,0)\n')
-        time.sleep(3)  
+        s.send(b'movel(p[0.1318,0.4625-0.05, 0.4805, -1.572, 0, 0],1,0.2,0,0)\n')
+        time.sleep(2)  
         # Second Hori. line  
         s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0,-0.1,0,0,0]),1,0.25,0,0)\n')
         time.sleep(1)
@@ -157,34 +156,76 @@ def grid():
         time.sleep(1)
         move_in()
         time.sleep(1)   
-        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[-0.1,0,0,0,0,0]),1,0.2,0,0)\n')     
-        time.sleep(2)  
-        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[-0.2,0,0,0,0,0]),1,0.2,0,0)\n')
-        time.sleep(2)
+        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[-0.3,0,0,0,0,0]),1,0.2,0,0)\n')
+        time.sleep(3)
         move_out()
-        s.send(b'movel(p[0.1318,0.4625, 0.3805, -1.572, 0, 0],1,0.2,0,0)\n')
-        time.sleep(3)  
+        s.send(b'movel(p[0.1318,0.4625-0.05, 0.3805, -1.572, 0, 0],1,0.2,0,0)\n')
+        time.sleep(2)  
         #First vertical line
         s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0,-0.1,0,0,0]),1,0.2,0,0)\n')
-        time.sleep(2)   
+        time.sleep(1)   
         move_in()
         s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0,0.3,0,0,0]),1,0.2,0,0)\n')     
-        time.sleep(3) 
+        time.sleep(2) 
         move_out() 
         s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0,-0.1,0,0,0]),1,0.2,0,0)\n')
-        time.sleep(2) 
+        time.sleep(1) 
         #Second vertical line
         s.send(b'movel(pose_add(get_actual_tcp_pose(),p[-0.1,0,0,0,0,0]),1,0.2,0,0)\n')
-        time.sleep(2)   
+        time.sleep(1)   
         s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0,0.1,0,0,0]),1,0.2,0,0)\n')
         time.sleep(1)
         move_in()
-        time.sleep(2)   
+        time.sleep(1)   
         s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0,-0.3,0,0,0]),1,0.2,0,0)\n')     
-        time.sleep(3)  
+        time.sleep(2)  
         s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,-0.05,0.1,0,0,0]),1,0.2,0,0)\n')
-        time.sleep(3) 
+        time.sleep(2) 
         play_position()
+
+def draw_vertical_line():
+        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0,0,-0.2,0,0,0]),1,0.2,0,0)\n')     
+        time.sleep(2)
+
+def draw_horizontal_line():
+        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0.2,0,0,0,0,0]),1,0.2,0,0)\n')
+        time.sleep(2)
+
+def draw_diagonal_line_0():
+        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[0.2,0,-0.2,0,0,0]),1,0.2,0,0)\n')
+        time.sleep(2)
+
+def draw_diagonal_line_2():
+        s.send(b'movel(pose_add(get_actual_tcp_pose(),p[-0.2,0,-0.2,0,0,0]),1,0.2,0,0)\n')
+        time.sleep(2)
+
+def draw_end_line(player):
+        winner = winner_row(player)
+        first_position = winner[0]
+        middle_position = winner[1]
+        rows = [[0, 1], [3, 4], [6, 7]]
+        columns = [[0, 3], [1, 4], [2, 5]]
+        diagonals = [[0, 4], [2, 4]]
+        time.sleep(1)
+        move_to_position(position[str(first_position+1)])
+        time.sleep(1)
+        move_in()
+        time.sleep(1)
+        if [first_position, middle_position] in rows:
+                draw_horizontal_line()
+        elif [first_position, middle_position] in columns:
+                draw_vertical_line()
+        elif [first_position, middle_position] in diagonals:
+                if first_position == 0:
+                        draw_diagonal_line_0()
+                else:
+                        draw_diagonal_line_2()
+        time.sleep(1)
+        play_position()
+        home()
+
+        print("Winner row: ", winner)
+
 #####################################################################################################################
 
 position = {
@@ -242,13 +283,16 @@ def draw_Tri():
 def draw_O():
         radius = 0.04  # Radius of the circle
         #move-up and waypoint1
+        move_out()
         cmd_move = relative_command(f'p[0, 0.0, {radius},  0.0, 0.0, 0.0]')
         s.send(cmd_move)
+        time.sleep(1)
+        move_in()
         time.sleep(1)
         #Waypoint2
         cmd_move = str.encode(f'movep(get_actual_tcp_pose(),0.1,0.1,r={radius})\n')
         s.send(cmd_move)
-        time.sleep(3)
+        time.sleep(2)
         #waypoint3
         cmd_move = str.encode(f'movec(pose_add(get_actual_tcp_pose(),p[-1*{radius}, 0.0, -1*{radius},  0.0, 0.0, 0.0]),pose_add(get_actual_tcp_pose(),p[0, 0.0, -2*{radius},  0.0, 0.0, 0.0]),0.1,0.05,r=0,mode=0)\n')
         s.send(cmd_move)
@@ -256,7 +300,7 @@ def draw_O():
         #waypoint4
         cmd_move = str.encode(f'movec(pose_add(get_actual_tcp_pose(),p[1*{radius}, 0.0, 1*{radius},  0.0, 0.0, 0.0]),pose_add(get_actual_tcp_pose(),p[0, 0.0, 2*{radius},  0.0, 0.0, 0.0]),0.1,0.05,r=0,mode=0)\n')
         s.send(cmd_move)
-        time.sleep(1)
+        time.sleep(3)
         # #waypoint5
         # cmd_move = str.encode(f'movec(pose_add(get_actual_tcp_pose(),p[-1*{radius}, 0.0, -1*{radius},  0.0, 0.0, 0.0]),pose_add(get_actual_tcp_pose(),p[1*{radius}, 0.0, -1*{radius},  0.0, 0.0, 0.0]),0.1,0.1,r=0.015)\n')
         # s.send(cmd_move)
@@ -326,8 +370,8 @@ if __name__ == '__main__':
         # gripper_open()
 
         UR_set_up()
-        gripper_connection()
-        gripper_open()
+        # gripper_connection()
+        # gripper_open()
         # time.sleep(3)
         # gripper_close()
         home()
