@@ -28,5 +28,5 @@ def export_dynamodb_to_dataframe():
         return None
 
 # Export data and save to Python file
-df = export_dynamodb_to_dataframe()
-print(df.head())
+# df = export_dynamodb_to_dataframe()
+# print(df.head())

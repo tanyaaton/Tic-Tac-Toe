@@ -3,6 +3,7 @@ board = [" " for _ in range(9)]
 from UR3e_control import robot_move, human_move, play_position, home, UR_set_up, test, grid, gripper_connection,gripper_open,gripper_close, draw_end_line
 from minimax_tictactoe import display_board, check_winner, is_board_full, board, computer_move
 # from pymodbus.client import ModbusTcpClient
+from df_export import export_dynamodb_to_dataframe
 
 import socket, struct, time
 import time
@@ -20,8 +21,8 @@ import numpy as np
 import streamlit as st
 
 st.set_page_config(
-    page_title="Retrieval Augmented Generation",
-    page_icon="🎮",
+    page_title="Tic-Tac-Toe",
+    page_icon="🤖",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -33,13 +34,23 @@ with st.sidebar:
     This is your Tic-Tac-Toe game.
     You can play with ROBOT!
     
-    🎥💌🤖✨
+    🎥 💌 🤖 ✨
     ''')     
     st.title('''To play:''')
     st.markdown('''          
     point your index finder to the position you want to play
     The robot will draw the symbol for you ;)
     ''')
+    df = export_dynamodb_to_dataframe()
+    new_df = df[['Player1', 'Winner', 'TotalMoves']].rename(
+            columns={
+                'Player1': 'Name',
+                'TotalMoves': 'Total moves'
+            }
+        ).sort_values(by='Total moves', ascending=True)
+    if new_df is not None:
+        st.markdown("### 🥇 Leaderboard")
+        st.dataframe(new_df, width=300, height=400)
 
 empty_path = 'image/empty.png'
 x_path = 'image/x.png'
