@@ -12,6 +12,7 @@ from minimax_tictactoe import winner_row
 def UR_set_up():
         global tcp, joint_rad, joint_deg, joint_rev
         robot = '10.10.0.61'
+        # robot = '192.168.1.106'
         port = 30003
         gripper_port  = 63352
         tcp = {}

@@ -1,6 +1,6 @@
 # Main game loop
 board = [" " for _ in range(9)]
-# from UR3e_control import robot_move, human_move, play_position, home, UR_set_up, test, grid, gripper_connection,gripper_open,gripper_close, draw_end_line
+from UR3e_control import robot_move, human_move, play_position, home, UR_set_up, test, grid, gripper_connection,gripper_open,gripper_close, draw_end_line
 from minimax_tictactoe import display_board, check_winner, is_board_full, board, computer_move
 # from pymodbus.client import ModbusTcpClient
 
@@ -97,15 +97,15 @@ def play_game():
     streamlit_display_table(path_list)
     while True:
         # Player's turn
-        # command = client_socket.recv(1024).decode() # Receive command from server(Flush)
+        command = client_socket.recv(1024).decode() # Receive command from server(Flush)
         while True:
             try:
-                # command = client_socket.recv(1024).decode()
-                # while not(command[-1].isdigit()):
-                #     command = client_socket.recv(1024).decode()
-                # print(f"Received Command: {command[-1]}")
-                # user_pos = int(command[-1]) - 1
-                user_pos = int(input("Choose your position (1-9): ")) - 1
+                command = client_socket.recv(1024).decode()
+                while not(command[-1].isdigit()):
+                    command = client_socket.recv(1024).decode()
+                print(f"Received Command: {command[-1]}")
+                user_pos = int(command[-1]) - 1
+                # user_pos = int(input("Choose your position (1-9): ")) - 1
                 if user_pos in range(9) and board[user_pos] == " ":
                     board[user_pos] = "X"
                     break
@@ -115,8 +115,8 @@ def play_game():
                 print("Invalid input. Please enter a number between 1 and 9.")
         
         print("user_pos", user_pos+1)
-        # human_move(user_pos+1, 'X')
-        # play_position()
+        human_move(user_pos+1, 'X')
+        play_position()
         streamlit_remove_table()
         update_path_list(user_pos, 'X')
         streamlit_display_table(path_list)
@@ -124,15 +124,15 @@ def play_game():
         
         # Check if player wins
         if check_winner("X"):
-            # draw_end_line("X")
+            draw_end_line("X")
             print("Congratulations! You win!")
             break
         
         # Check if it's a tie
         if is_board_full():
             print("It's a tie!")
-            # play_position()
-            # home()
+            play_position()
+            home()
             break
         
         # Computer's turn
@@ -140,30 +140,30 @@ def play_game():
         streamlit_remove_table()
         update_path_list(computer_pos-1, 'O')
         streamlit_display_table(path_list)
-        # robot_move(computer_pos, 'O')
+        robot_move(computer_pos, 'O')
         display_board()
         
         # Check if computer wins
         if check_winner("O"):
-            # draw_end_line("O")
+            draw_end_line("O")
             print("Computer wins! Better luck next time!")
             break
         
         # Check if it's a tie
         if is_board_full():
             print("It's a tie!")
-            # play_position()
-            # home()
+            play_position()
+            home()
             break
 
 
 if __name__ == '__main__':
-        # server_connection()
+        server_connection()
         # gripper_init()
-        # UR_set_up()
-        # home()
+        UR_set_up()
+        home()
         # grid()
         # test()
-        # play_position()
+        play_position()
         play_game()
         # robot_move(1, 'X')
