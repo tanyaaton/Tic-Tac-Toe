@@ -2,6 +2,7 @@
 board = [" " for _ in range(9)]
 from UR3e_control import robot_move, human_move, play_position, home, UR_set_up, test, grid, gripper_connection,gripper_open,gripper_close, draw_end_line
 from minimax_tictactoe import display_board, check_winner, is_board_full, board, computer_move
+# from pymodbus.client import ModbusTcpClient
 
 import socket, struct, time
 import time
@@ -10,23 +11,24 @@ import boto3
 from uuid import uuid4
 from minimax_tictactoe import display_board, check_winner, is_board_full, board, computer_move
 
+#-------fill in this part after we have front end-------
+#receivee player name from front end
+#player_name = ???? 
 import pandas as pd
 import numpy as np
 
 import streamlit as st
 
 st.set_page_config(
-    page_title="Tic-Tac-Toe gane",
+    page_title="Retrieval Augmented Generation",
     page_icon="🎮",
-    layout="centered",
+    layout="wide",
     initial_sidebar_state="expanded"
 )
-st.title("Tic-Tac-Toe 🎮")
-
-player_name = st.text_input("Enter your name:")
+st.header("Tic-Tac-Toe 🎮")
 
 with st.sidebar:
-    st.title(f"Welcome {player_name}")
+    st.title(f"Welcome")
     st.markdown('''
     This is your Tic-Tac-Toe game.
     You can play with ROBOT!
@@ -43,6 +45,12 @@ empty_path = 'image/empty.png'
 x_path = 'image/x.png'
 o_path = 'image/o.png'
 
+#------initialize dynamodb client------
+dynamodb = boto3.resource('dynamodb', region_name='ap-southeast-1')  
+table = dynamodb.Table('TicTacToeGameHistory')
+
+if 'player_name' not in st.session_state:
+    st.session_state.player_name = None
 if 'table_container' not in st.session_state:
     st.session_state.table_container = st.empty()
 
@@ -56,34 +64,33 @@ def update_path_list(index, symbol):
 
 def streamlit_display_table(path_list):
     with st.session_state.table_container.container():
-        col_width = 1  # Adjusted column width for a smaller layout
-        image_width = 150  # Set smaller image width
+        col_width = 1
         # First row
         col1, col2, col3 = st.columns([col_width, col_width, col_width])
         with col1:
-            st.image(path_list[0], width=image_width, use_column_width=True)
+            st.image(path_list[0], width=200)
         with col2:
-            st.image(path_list[1], width=image_width, use_column_width=True)
+            st.image(path_list[1], width=200)
         with col3:
-            st.image(path_list[2], width=image_width, use_column_width=True)
+            st.image(path_list[2], width=200)
 
         # Second row
-        col4, col5, col6 = st.columns([col_width, col_width, col_width])
+        col4, col5, col6 = st.columns(3)
         with col4:
-            st.image(path_list[3], width=image_width, use_column_width=True)
+            st.image(path_list[3], width=200)
         with col5:
-            st.image(path_list[4], width=image_width, use_column_width=True)
+            st.image(path_list[4], width=200)
         with col6:
-            st.image(path_list[5], width=image_width, use_column_width=True)
+            st.image(path_list[5], width=200)
 
         # Third row
-        col7, col8, col9 = st.columns([col_width, col_width, col_width])
+        col7, col8, col9 = st.columns(3)
         with col7:
-            st.image(path_list[6], width=image_width, use_column_width=True)
+            st.image(path_list[6], width=200)
         with col8:
-            st.image(path_list[7], width=image_width, use_column_width=True)
+            st.image(path_list[7], width=200)
         with col9:
-            st.image(path_list[8], width=image_width, use_column_width=True)
+            st.image(path_list[8], width=200)
 
 def streamlit_remove_table():
     """Clear the existing table display to prepare for a new one"""
@@ -101,7 +108,19 @@ def gripper_init():
     time.sleep(3)
     gripper_close()
 
+# Player name input form
+def get_player_name():
+    if st.session_state.player_name is None:
+        with st.form("player_name_form"):
+            player_name = st.text_input("Enter your name to start playing:", "")
+            submit_button = st.form_submit_button("Start Game")
+            if submit_button and player_name:
+                st.session_state.player_name = player_name
+                st.success(f"Welcome, {player_name}! Let's play Tic-Tac-Toe.")
+
+
 def play_game():
+    move_count = 0
     print("Welcome to Tic-Tac-Toe!")
     print("The board positions are as follows:")
     # play_position()  
@@ -128,27 +147,27 @@ def play_game():
                 print("Invalid input. Please enter a number between 1 and 9.")
         
         print("user_pos", user_pos+1)
-        move += 1 #add 1 move to player's record
-        human_move(user_pos+1, 'X')
-        play_position()
+        move_count += 1 #add 1 move to player's record
+        display_board()
         streamlit_remove_table()
         update_path_list(user_pos, 'X')
         streamlit_display_table(path_list)
-        display_board()
+        human_move(user_pos+1, 'X')
+        play_position()
         
         # Check if player wins
         if check_winner("X"):
             draw_end_line("X")
             st.header("Congratulations! You win!")
-            # player win computer by int(move) moves
-            save_game_history(player_name,"Robot",player_name,move)
+            #player win computer by int(move) moves
+            save_game_history(st.session_state.player_name,"Robot",st.session_state.player_name,move_count)
             break
         
         # Check if it's a tie
         if is_board_full():
             st.header("It's a tie!")
              #player ties computer by int(move) moves
-            save_game_history(player_name,"Robot","Draw",move)
+            save_game_history(st.session_state.player_name,"Robot","Draw",move_count)
             play_position()
             home()
             break
@@ -158,14 +177,14 @@ def play_game():
         streamlit_remove_table()
         update_path_list(computer_pos-1, 'O')
         streamlit_display_table(path_list)
-        # robot_move(computer_pos, 'O')
+        robot_move(computer_pos, 'O')
         display_board()
         
         # Check if computer wins
         if check_winner("O"):
             draw_end_line("O")
             st.header("Computer wins! Better luck next time!")
-            save_game_history(player_name,"Robot","Robot",move)
+            save_game_history(st.session_state.player_name,"Robot","Robot",move_count)
             break
         
         # Check if it's a tie
@@ -174,10 +193,6 @@ def play_game():
             play_position()
             home()
             break
-
-        # if st.button("Reset"):
-        #         st.session_state.clear()
-        #         streamlit_remove_table()
 
 # Function to save win/loss history and total moves
 def save_game_history(player1, player2, winner, total_moves):
@@ -189,6 +204,7 @@ def save_game_history(player1, player2, winner, total_moves):
         'Winner': winner,
         'TotalMoves': total_moves
     }
+    
     try:
         table.put_item(Item=item)
         print(f"Game {game_id} saved successfully.")
@@ -197,6 +213,9 @@ def save_game_history(player1, player2, winner, total_moves):
 
 
 if __name__ == '__main__':
+    get_player_name()
+    if st.session_state.player_name:
+        st.header("player: "+st.session_state.player_name)
         server_connection()
         # gripper_init()
         UR_set_up()
@@ -204,10 +223,6 @@ if __name__ == '__main__':
         # grid()
         # test()
         # play_position()
-        #------initialize dynamodb client------
-        dynamodb = boto3.resource('dynamodb', region_name='ap-southeast-1')  
-        table = dynamodb.Table('TicTacToeGameHistory')
-        move_count = 0
         play_position()
-        if player_name:
-            play_game()
+        play_game()
+        # robot_move(1, 'X')
