@@ -2,7 +2,6 @@
 board = [" " for _ in range(9)]
 from UR3e_control import robot_move, human_move, play_position, home, UR_set_up, test, grid, gripper_connection,gripper_open,gripper_close, draw_end_line
 from minimax_tictactoe import display_board, check_winner, is_board_full, board, computer_move
-# from pymodbus.client import ModbusTcpClient
 
 import socket, struct, time
 import time
