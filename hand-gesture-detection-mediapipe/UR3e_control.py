@@ -56,8 +56,6 @@ def gripper_open():
 #####################################################################################################################
                 
 def read_pos():
-
-
         #Read tcp value from Modbus server
         t = client.read_holding_registers(400,6)
         
@@ -242,12 +240,6 @@ position = {
     "9": "p[0.1,  0.0, -0.1,  0.0, 0.0, 0.0]",
 }
 
-# position_X = {
-#     "q1": "p[0.02, 0.0, 0.02,  0.0, 0.0, 0.0]",
-#     "q2": "p[-0.02,  0.0, -0.02,  0.0, 0.0, 0.0]",
-#     "q3": "p[0.0, 0.0, 0.02828,  0.0, 0.0, 0.0]",
-#     "q4": "p[0.02, 0.0, -0.02,  0.0, 0.0, 0.0]"
-# }
 position_X = {
     "q1": "p[0.02828, 0.0, 0.02828,  0.0, 0.0, 0.0]",
     "q2": "p[-0.02828*2,  0.0, -0.02828*2,  0.0, 0.0, 0.0]",
@@ -302,10 +294,6 @@ def draw_O():
         cmd_move = str.encode(f'movec(pose_add(get_actual_tcp_pose(),p[1*{radius}, 0.0, 1*{radius},  0.0, 0.0, 0.0]),pose_add(get_actual_tcp_pose(),p[0, 0.0, 2*{radius},  0.0, 0.0, 0.0]),0.1,0.05,r=0,mode=0)\n')
         s.send(cmd_move)
         time.sleep(3)
-        # #waypoint5
-        # cmd_move = str.encode(f'movec(pose_add(get_actual_tcp_pose(),p[-1*{radius}, 0.0, -1*{radius},  0.0, 0.0, 0.0]),pose_add(get_actual_tcp_pose(),p[1*{radius}, 0.0, -1*{radius},  0.0, 0.0, 0.0]),0.1,0.1,r=0.015)\n')
-        # s.send(cmd_move)
-        # time.sleep(1)
 
 def relative_command(p):
     return str.encode(f'movel(pose_add(get_actual_tcp_pose(),{p}),1,0.2,0,0)\n')
@@ -364,27 +352,3 @@ position = {
     "8": "p[0.0,  0.0, -0.1,  0.0, 0.0, 0.0]",
     "9": "p[0.1,  0.0, -0.1,  0.0, 0.0, 0.0]",
 }
-
-if __name__ == '__main__':
-        # gripper_test()
-        # gripper_close()
-        # gripper_open()
-
-        UR_set_up()
-        # gripper_connection()
-        # gripper_open()
-        # time.sleep(3)
-        # gripper_close()
-        home()
-        # draw_X()
-        # play_position()
-        # draw_Tri()
-        # draw_O()
-        
-        # play_position()
-        # robot_move(1, 'X')
-        # play_position()
-        # test()
-        # grid()
-        # read_pos()
-        # human_move(1, 'X')

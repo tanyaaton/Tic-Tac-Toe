@@ -1,25 +1,18 @@
-# Main game loop
-board = [" " for _ in range(9)]
-from UR3e_control import robot_move, human_move, play_position, home, UR_set_up, test, grid, gripper_connection,gripper_open,gripper_close, draw_end_line
-from minimax_tictactoe import display_board, check_winner, is_board_full, board, computer_move
-# from pymodbus.client import ModbusTcpClient
-from df_export import export_dynamodb_to_dataframe
-
-import socket, struct, time
+import streamlit as st
+import socket, time
 import time
-from gripper import Gripper
 import boto3
 from uuid import uuid4
+
+from UR3e_control import robot_move, human_move, play_position, home, UR_set_up, gripper_connection,gripper_open,gripper_close, draw_end_line
+from minimax_tictactoe import display_board, check_winner, is_board_full, board, computer_move
+from df_export import export_dynamodb_to_dataframe
 from minimax_tictactoe import display_board, check_winner, is_board_full, board, computer_move
 
-#-------fill in this part after we have front end-------
-#receivee player name from front end
-#player_name = ???? 
-import pandas as pd
-import numpy as np
 
-import streamlit as st
+#####################################################################################################################
 
+# Streamlit frontend
 st.set_page_config(
     page_title="Tic-Tac-Toe",
     page_icon="🤖",
@@ -55,8 +48,9 @@ with st.sidebar:
 empty_path = 'image/empty.png'
 x_path = 'image/x.png'
 o_path = 'image/o.png'
+board = [" " for _ in range(9)]
 
-#------initialize dynamodb client------
+# initialize dynamodb client
 dynamodb = boto3.resource('dynamodb', region_name='ap-southeast-1')  
 table = dynamodb.Table('TicTacToeGameHistory')
 
@@ -67,6 +61,7 @@ if 'table_container' not in st.session_state:
 
 path_list = [empty_path, empty_path, empty_path, empty_path, empty_path, empty_path, empty_path, empty_path, empty_path]
 
+# fronend function for displaying
 def update_path_list(index, symbol):
     if symbol == 'X':
         path_list[index] = x_path
@@ -129,7 +124,9 @@ def get_player_name():
                 st.session_state.player_name = player_name
                 st.success(f"Welcome, {player_name}! Let's play Tic-Tac-Toe.")
 
+#####################################################################################################################
 
+# main game loop
 def play_game():
     move_count = 0
     print("Welcome to Tic-Tac-Toe!")
@@ -236,4 +233,3 @@ if __name__ == '__main__':
         # play_position()
         play_position()
         play_game()
-        # robot_move(1, 'X')

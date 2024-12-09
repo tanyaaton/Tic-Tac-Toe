@@ -26,7 +26,3 @@ def export_dynamodb_to_dataframe():
     except Exception as e:
         print(f"Error exporting data: {e}")
         return None
-
-# Export data and save to Python file
-# df = export_dynamodb_to_dataframe()
-# print(df.head())
